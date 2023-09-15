@@ -5,8 +5,8 @@ class Slot {
   final String eventName;
   final String roomNumber;
   final bool enrolled;
-  final List<int> recurrenceDays; // List of integers representing days of the week (1 to 7).
-
+  final List<int> recurrenceDays;// List of integers representing days of the week (1 to 7).
+  final int UG;
 
   Slot( {
     required this.eventName,
@@ -14,6 +14,7 @@ class Slot {
     required this.endTime,
     required this.roomNumber,
     required this.enrolled,
-    required this.recurrenceDays
+    required this.recurrenceDays,
+    required this.UG
   });
 }

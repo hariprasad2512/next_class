@@ -30,8 +30,9 @@ class _SplashState extends State<Splash> with TickerProviderStateMixin {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SpinKitRing(
-                size: 50, color: isDarkMode ? Colors.white : Colors.black45),
+            SpinKitSpinningCircle(
+              duration: Duration(milliseconds: 2000),
+                size: 50, color: Colors.blueAccent),
           ],
         ),
       ),

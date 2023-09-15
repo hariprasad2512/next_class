@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,6 +27,21 @@ class BottomBarScreen extends StatefulWidget {
 
 class _BottomBarScreenState extends State<BottomBarScreen> {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  late int ug = 3;
+  Future<void> getUserUG() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final userRef = FirebaseFirestore.instance.collection('users').doc(
+        currentUser?.uid);
+    final userSnapshot = await userRef.get();
+
+    if (userSnapshot.exists) {
+      setState(() {
+        ug = userSnapshot.data()?['UG'] ??
+            3; // Update the ug variable with the retrieved UG value
+      });
+    }
+  }
+
   final List<Map<String, dynamic>> pages = [
     {'page': '', 'title': 'Home'},
     {'page': '', 'title': 'Timetable'},
@@ -51,9 +67,9 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
     int dayOfWeekAsNumber = getDayOfWeekAsNumber(now);
     bool isDarkMode = brightness == Brightness.dark;
     pages[0]['page'] = NextEventScreen(events: widget.events, selectedDay: dayOfWeekAsNumber);
-    pages[1]['page'] = WhatsAppBar(today: dayOfWeekAsNumber-1,);
+    pages[1]['page'] = WhatsAppBar(today: dayOfWeekAsNumber-1,events: widget.events,);
     pages[2]['page'] = Almanac();
-    pages[3]['page'] = UserPage();
+    pages[3]['page'] = UserPage(events: widget.events, ug: ug,);
 
 
     int selectedIndexDef = widget.selectedIndex ?? 0;
@@ -64,6 +80,7 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
       body: pages[selectedIndexDef]['page'],
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: isDarkMode ? Colors.black45 : Colors.white,
         selectedItemColor: Colors.blueAccent,
         unselectedItemColor: isDarkMode ? Colors.white : Colors.black54,
         type: BottomNavigationBarType.fixed,

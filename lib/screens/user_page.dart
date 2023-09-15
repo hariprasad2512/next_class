@@ -1,21 +1,19 @@
-import 'dart:convert';
-import 'dart:math';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:next_class/data/slot.dart';
 import 'package:next_class/screens/branch_page.dart';
 import 'package:next_class/screens/login_screen.dart';
-import 'package:next_class/screens/subjects_page.dart';
-
-import 'bottombar.dart';
+import 'package:next_class/screens/ug_page.dart';
 
 
 class UserPage extends StatefulWidget {
-  UserPage({super.key,});
+  final List<Slot> events;
+  final int ug;
+  UserPage({required this.events,required this.ug});
 
   @override
   State<UserPage> createState() => _UserPageState();
@@ -27,18 +25,6 @@ class _UserPageState extends State<UserPage> {
   int currentIndex = 0;
   late var accentColor = Color(0xffededed);
 
-  List<String> badges = [
-    'bronze',
-    'silver',
-    'gold',
-    'sapphire',
-    'ruby',
-    'emerald',
-    'amethyst',
-    'pearl',
-    'obsidian',
-    'diamond'
-  ];
 
   late var currentLength = 0;
   late var maxLength = 50;
@@ -46,28 +32,6 @@ class _UserPageState extends State<UserPage> {
   var brightness =
       SchedulerBinding.instance.platformDispatcher.platformBrightness;
 
-  Future<int> getMoviePosterURLs(String uid) async {
-    try {
-      // Get user document by UID
-      final userDoc =
-      await FirebaseFirestore.instance.collection('users').doc(uid).get();
-
-      if (!userDoc.exists) {
-        throw Exception('User document does not exist');
-      }
-
-      // Get movie IDs array from user document
-      final movieIds = List<num>.from(userDoc.data()!['watchedList']);
-
-      // Array to store movie poster URLs
-      return movieIds.length;
-    } catch (error) {
-      print('Error retrieving movie poster URLs: $error');
-      rethrow;
-    }
-  }
-
-  String badge = 'bronze';
 
 
 
@@ -131,7 +95,7 @@ class _UserPageState extends State<UserPage> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => LoginScreen()));
+                                builder: (context) => LoginScreen(events: [],)));
                             ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Signed Out Successfully'),
@@ -150,12 +114,12 @@ class _UserPageState extends State<UserPage> {
             );
           });
     }
-
+    final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
         backgroundColor: isDark ? Colors.black : Colors.white,
         body: SafeArea(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Column(
                         children: [
@@ -167,68 +131,75 @@ class _UserPageState extends State<UserPage> {
                                     text: TextSpan(
                                         children: [
                                           TextSpan(
-                                              text: '${firstName ?? "Guest"}!',
+                                              text: '${firstName ?? "Cadbury"}!',
                                               style: GoogleFonts.playfairDisplay(
                                                   color: isDark
                                                       ? Colors.white
                                                       : Colors.black,
-                                                  fontSize: 35)),
+                                                  fontSize: 33)),
                                         ],
                                         text: ' Hey there ',
                                         style: GoogleFonts.playfairDisplay(
                                             color: isDark
                                                 ? Colors.white
                                                 : Colors.black,
-                                            fontSize: 35))),
+                                            fontSize: 33))),
                               ),
                             ],
                           ),
                           SizedBox(
                             height: 20,
                           ),
-                          Divider(
-                            thickness: 2,
-                            color: isDark ? Colors.white : Colors.black54,
-                          ),
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          listItem(
-                            title: 'Edit Courses',
-                            myicon: FaIcon(
-                              FontAwesomeIcons.graduationCap,
-                              color: isDark ? Colors.white : Colors.black,
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => BranchSelection()));
-                            },
-                          ),
-                          listItem(
-                            title: 'Sign Out',
-                            myicon: FaIcon(
-                              FontAwesomeIcons.arrowRightFromBracket,
-                              color: isDark ? Colors.white : Colors.black,
-                            ),
-                            onPressed: () async {
-                              await showLogOutDialog();
-                            },
-                          ),
-                          SizedBox(
-                            height: 80,
-                          ),
-                          SizedBox(height: 10),
-                          Image.asset('assets/nextClass.png',height: 100,width: 100,),
-                          SizedBox(height: 20,),
-                          Center(child: Text('© nextClass 2023' , style: TextStyle(color: isDark ? Colors.white : Colors.black),)),
-
 
                         ],
                       ),
+                      Container(
+                        constraints: BoxConstraints(maxWidth: screenWidth * 0.95),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          color: Color(0xFF182D3F),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 20,),
+                            listItem(
+                              title: 'Edit Courses',
+                              myicon: FaIcon(
+                                FontAwesomeIcons.graduationCap,
+                                color: Colors.black,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => UGPage(events: widget.events,)));
+                              },
+                            ),
+                            SizedBox(height: 20,),
+                            listItem(
+                              title: 'Sign Out',
+                              myicon: FaIcon(
+                                FontAwesomeIcons.arrowRightFromBracket,
+                                color: Colors.black,
+                              ),
+                              onPressed: () async {
+                                await showLogOutDialog();
+                              },
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+
+
+
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 50,),
+                      Image.asset('assets/nextClass.png',height: 100,width: 100,),
+                      Center(child: Text('© nextClass 2023' , style: TextStyle(color: isDark ? Colors.white : Colors.black),)),
+                      SizedBox(height:5,),
                     ],
                   ),
                 ));
@@ -247,20 +218,28 @@ class listItem extends StatelessWidget {
       {required this.title, required this.myicon, required this.onPressed});
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
     bool isDark = brightness == Brightness.dark;
-    return ListTile(
-      title: Text(
-        title,
-        style: TextStyle(color: isDark ? Colors.white : Colors.black),
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20)
       ),
-      leading: myicon,
-      trailing: FaIcon(
-        FontAwesomeIcons.chevronRight,
-        color: isDark ? Colors.white : Colors.black,
+      child: ListTile(
+        title: Text(
+          title,
+          style: TextStyle(color: Colors.black),
+        ),
+        leading: myicon,
+        trailing: FaIcon(
+          FontAwesomeIcons.chevronRight,
+          color: Colors.black,
+        ),
+        onTap: () {
+          onPressed();
+        },
       ),
-      onTap: () {
-        onPressed();
-      },
     );
   }
 }
